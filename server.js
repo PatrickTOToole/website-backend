@@ -43,7 +43,7 @@ function retryLoop(max_retries, backoff, waitsecs, name, func) {
 }
 
 const app = express()
-const whitelist = ["http://localhost:3000",`http://${results.wlp31s0}:3000`]
+const whitelist = ["http://localhost:3000",`http://${results.wlp31s0}:3000`,"https://main.d1fwghcuadi9z5.amplifyapp.com"]
 
 const corsOptions = {
 
