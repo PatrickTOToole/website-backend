@@ -4,7 +4,10 @@ const express = require('express')
 const mountRoutes = require('./express_routes')
 const cors = require('cors');
 dotenv.config()
-const port = process.env.PORT; //Line 3
+let port = 5000
+if (process.env.PORT != undefined){
+    port = process.env.PORT
+}
 const { networkInterfaces } = require('os');
 
 const nets = networkInterfaces();
