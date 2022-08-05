@@ -6,10 +6,10 @@ const mountRoutes = require('./express_routes')
 const validators = require('./validation')
 const cors = require('cors');
 dotenv.config()
-const port = 5000; //Line 3
+let port = 5000; //Line 3
 let FRONT_END = "http://localhost:3000"
-if (process.env.BUILD_ENV === "prod"){
-    const port = process.env.PORT; //Line 3
+if (process.env.PORT){
+    port = process.env.PORT; //Line 3
     FRONT_END = "https://main.d1fwghcuadi9z5.amplifyapp.com"
     //FRONT_END = process.env.FRONT_END
 }
