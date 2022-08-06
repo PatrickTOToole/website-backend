@@ -1,4 +1,4 @@
-function initGame(cols, max_guesses, num_colors, names, answer) {
+function initGame(cols, max_guesses, num_colors, players, answer) {
     noLose = false
     NOTHING = "black"
     WRONG_PLACE = "white"
@@ -14,6 +14,7 @@ function initGame(cols, max_guesses, num_colors, names, answer) {
     }
     // Creates a object to store the data for the game
     let obj = {
+        "players": players,
         "max_guesses" : max_guesses,
         "guess_count" : 0,
         "guess_arr" : [],
@@ -21,7 +22,6 @@ function initGame(cols, max_guesses, num_colors, names, answer) {
         "noLose" : noLose,
         "num_colors" : num_colors,
         "cols" : cols,
-        "names" : names,
         "answer" : answer
     }
     obj.addGuess = (guess) => {
