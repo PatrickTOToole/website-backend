@@ -10,7 +10,7 @@ let port = 5000; //Line 3
 let FRONT_END = "http://localhost:3000"
 if (process.env.PORT){
     port = process.env.PORT; //Line 3
-    FRONT_END = "https://main.d1fwghcuadi9z5.amplifyapp.com"
+    FRONT_END = "https://www.patricktotoole.com"
     //FRONT_END = process.env.FRONT_END
 }
 function retryLoop(max_retries, backoff, waitsecs, name, func) {
