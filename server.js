@@ -141,7 +141,7 @@ app.get('/validateLogin', (req, res) => {
 });
 let rooms = {}
 let games = {}
-function createRoom(roomName){
+function createRoom(roomName, sessKey){
     if (!validateUserInput(roomName)){
         return false
     }
@@ -149,7 +149,8 @@ function createRoom(roomName){
         return false
     }
     rooms[roomName] = {
-        players: []
+        players: [sessKey],
+        owner: sessKey
     }
     return true
 }
@@ -190,8 +191,12 @@ app.get('/createGame', (req, res) => { //Line 9
     }
 });
 app.get('/createRoom', (req, res) => { //Line 9
-    if (validateUserInput(req.query.roomName) && req.query.players && req.query.answer && req.query.answer.length == 4){
-        let resp = createRoom(req.query.roomName)
+    console.log(`here with ${req.query.roomName}`)
+    console.log(`here with ${req.query.sessKey}`)
+    let roomName = req.query.roomName
+    let sessKey = req.query.sessKey
+    if (validateUserInput(roomName)){
+        let resp = createRoom(roomName, sessKey)
         if(resp) {
             res.send("Created Game")
         } else {
@@ -247,4 +252,3 @@ app.get('/express_backend', (req, res) => { //Line 9
     res.send({ express: 'New Message For Test' }); //Line 10
 });
   
-console.log("hid")
