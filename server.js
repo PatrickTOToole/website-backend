@@ -120,7 +120,6 @@ app.get('/removeSession',(req,res) => {
 
     }
 })
-
 app.get('/validateLogin', (req, res) => {
     // ---- validateUsername ----
     if(!validateUserInput(req.query.username)){
