@@ -3,8 +3,9 @@ const { initGame } = require('./games');
 const dotenv = require("dotenv")
 const express = require('express')
 const mountRoutes = require('./express_routes')
-const validators = require('./validation')
+// const validators = require('./validation')
 const cors = require('cors');
+const bcrypt = require('bcryptjs')
 dotenv.config()
 let port = 5000; //Line 3
 let FRONT_END = "http://localhost:3000"
@@ -80,6 +81,7 @@ function createSessionKey(uuid){
         UUID: uuid,
         TTL: sess_end
     }
+    return sessKey
 }
 // function validateSession(sessions, sessKey){
 //     let session = sessions.hasOwnProperty(sessKey)?sessions[sessKey]:null
@@ -88,6 +90,36 @@ function createSessionKey(uuid){
 //     }
 //     return false
 // }
+
+app.get('/createGuestSession', (req, res) =>{
+    // if(!validateUserInput(req.query.sessKey)){
+    //     res.send(new Error("Invalid Input"))
+    // } else {
+
+    // }
+    let sessKey = req.query.sessKey
+    if(sessions.hasOwnProperty(sessKey)){
+        res.send(new Error('Session already exists'))
+    } else {
+        let sess_end = new Date(new Date())
+        sess_end.setDate(sess_end.getDate() + 0.5)
+        sessions[sessKey] = {
+            UUID: "Guest",
+            TTL: sess_end
+        }
+        res.send("Successful")
+    }
+})
+app.get('/removeSession',(req,res) => {
+    let sessKey = req.query.sessKey
+    if(sessions.hasOwnProperty(sessKey)){
+        delete sessions[sessKey]
+        res.send("Successful")
+    } else {
+        res.send(new Error('Session does not exist'))
+
+    }
+})
 
 app.get('/validateLogin', (req, res) => {
     // ---- validateUsername ----
@@ -122,7 +154,7 @@ function createRoom(roomName){
     return true
 }
 function validateUserInput(inputVal){
-    return false
+    return true
 }
 function addPlayerToRoom(roomName, sessKey){
     if (!validateUserInput(roomName)){
@@ -157,6 +189,18 @@ app.get('/createGame', (req, res) => { //Line 9
         res.send(new Error("Invalid Input"))
     }
 });
+app.get('/createRoom', (req, res) => { //Line 9
+    if (validateUserInput(req.query.roomName) && req.query.players && req.query.answer && req.query.answer.length == 4){
+        let resp = createRoom(req.query.roomName)
+        if(resp) {
+            res.send("Created Game")
+        } else {
+            res.send(new Error("Invalid Input"))
+        }
+    } else {
+        res.send(new Error("Invalid Input"))
+    }
+});
 
 createGame("Pickle", 4, 123, 6, ["player1", "player3"], ["purple","white","blue","green"])
 createGame("Goat", 4, 12, 6, ["player1", "player2"], ["purple","purple","blue","green"])
@@ -170,9 +214,9 @@ app.get('/mastermindRooms', (req, res) => { //Line 9
 
 app.get('/mastermindGuesses', (req, res) => { //Line 9'
     let gameID = req.query.gameID
-    let uuid = req.query.sessKey
+    let sessKey = req.query.sessKey
     let game = games.hasOwnProperty(gameID)?games[gameID]:null
-    if (game && uuid) {
+    if (game && game != undefined && sessKey) {
         if (game.players.hasOwnProperty(sessKey)){
             res.send([game.guess_arr, game.res_arr]); //Line 10
         } else {
@@ -185,9 +229,9 @@ app.get('/mastermindGuesses', (req, res) => { //Line 9'
 
 app.get('/mastermind', (req, res) => { //Line 9'
     let gameID = req.query.gameID
-    let uuid = req.query.sessKey
+    let sessKey = req.query.sessKey
     let game = games.hasOwnProperty(gameID)?games[gameID]:null
-    if (game && uuid) {
+    if (game && sessKey) {
         if (game.players.hasOwnProperty(sessKey)){
             let resp = game.addGuess(req.query.guess)
             games[req.query.gameID] = game
