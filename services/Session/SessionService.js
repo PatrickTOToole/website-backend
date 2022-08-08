@@ -44,8 +44,9 @@ class SessionService {
             let session = this.sessions.hasOwnProperty(sessKey)?this.sessions[sessKey]:null
             if(session && session.TTL < new Date()){
                 res.send("true")
+            } else {
+                res.send("false")
             }
-            res.send("false")
         }
         this.removeSession = (req, res) => {
             const {sessKey} = req.query
