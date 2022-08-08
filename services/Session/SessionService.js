@@ -3,7 +3,7 @@ const Router = require('express-promise-router')
 class SessionService {
     constructor(app, sessions){
         this.sessions = sessions
-        this.createSession = (res, req) => {
+        this.createSession = (req, res) => {
             const {uuid} = req.query.uuid
             let sessKey = uuidv4()
             let sess_end = new Date(new Date())
@@ -19,7 +19,7 @@ class SessionService {
             }
             return sessKey
         }
-        this.createGuestSession = (res, req) => {
+        this.createGuestSession = (req, res) => {
             // if(!validateUserInput(req.query.sessKey)){
             //     res.send(new Error("Invalid Input"))
             // } else {
@@ -43,9 +43,9 @@ class SessionService {
             const {sessKey} = req.query
             let session = this.sessions.hasOwnProperty(sessKey)?this.sessions[sessKey]:null
             if(session && session.TTL < new Date()){
-                return true
+                res.send("true")
             }
-            return false
+            res.send("false")
         }
         this.removeSession = (req, res) => {
             const {sessKey} = req.query

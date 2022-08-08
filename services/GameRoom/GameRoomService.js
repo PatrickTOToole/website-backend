@@ -6,16 +6,17 @@ class GameRoomService {
         this.rooms = rooms
 
         this.addRoom = (req, res) => {
-            const {roomName, sessKey} = req.query
+            const {roomName, sessKey, type } = req.query
             // if (!validateUserInput(roomName)){
             //     return false
             // }
-            if(rooms.hasOwnProperty(roomName)) {
+            if(rooms.hasOwnProperty(roomName) && type) {
                 res.send(false)
             } else {
                 this.rooms[roomName] = {
                     players: [sessKey],
-                    owner: sessKey
+                    owner: sessKey,
+                    type: type
                 }
                 res.send(true)
             }
@@ -25,7 +26,7 @@ class GameRoomService {
             // if (!validateUserInput(roomName)){
             //     return false
             // }
-            const {roomName} = req.query
+            const {roomName, sessKey} = req.query
             if(!this.rooms.hasOwnProperty(roomName)) {
                 res.send(false)
             } else {
@@ -35,14 +36,22 @@ class GameRoomService {
                         players.push(this.sessions[player].Name)
                     }
                 })
-                let owner = this.sessions[this.rooms[roomName].owner].Name
-                res.send({
+                let owner = sessKey
+                let ownerKey = this.rooms[roomName].owner
+                if(this.sessions.hasOwnProperty(ownerKey)){
+                    owner = this.sessions[ownerKey].Name
+                }
+                let resp = {
                     owner: owner,
-                    players: players
-                })
+                    players: players,
+                    type: this.rooms[roomName].type
+                }
+                console.log(this.sessions)
+                res.send(resp)
             }
         }
         this.listRooms = (req, res) => {
+            const {type} = req.query
             res.send(Object.keys(rooms))
         }
         this.addPlayer = (req, res) => {
