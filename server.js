@@ -29,7 +29,11 @@ const corsOptions = {
   credentials: true,
 }
 app.use(cors(corsOptions))
-app.listen(port, () => {
+const server = require('http').createServer(app);
+const io = require('socket.io')(server);
+
+io.on('connection', () => { /* … */ });
+server.listen(port, () => {
     console.log(`App listening on ${port}`)
 });
 // mountRoutes(app)
