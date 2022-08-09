@@ -38,8 +38,8 @@ class GameRoomService {
                     if(this.sessions.hasOwnProperty(player)) {
                         players.push(this.sessions[player].Name)
                     }
-                    console.log(player)
                 })
+                console.log(sessKey)
                 let owner = sessKey
                 let ownerKey = room.owner
                 if(this.sessions.hasOwnProperty(ownerKey)){
