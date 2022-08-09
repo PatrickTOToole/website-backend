@@ -31,13 +31,17 @@ class GameRoomService {
                 res.send(false)
             } else {
                 let players = []
-                this.rooms[roomName].players.forEach((player) => {
+                let room = this.rooms[roomName]
+                console.log(room)
+                console.log(this.sessions)
+                room["players"].forEach((player) => {
                     if(this.sessions.hasOwnProperty(player)) {
                         players.push(this.sessions[player].Name)
                     }
+                    console.log(player)
                 })
                 let owner = sessKey
-                let ownerKey = this.rooms[roomName].owner
+                let ownerKey = room.owner
                 if(this.sessions.hasOwnProperty(ownerKey)){
                     owner = this.sessions[ownerKey].Name
                 }
@@ -46,7 +50,6 @@ class GameRoomService {
                     players: players,
                     type: this.rooms[roomName].type
                 }
-                console.log(this.sessions)
                 res.send(resp)
             }
         }
