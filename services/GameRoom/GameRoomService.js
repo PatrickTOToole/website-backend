@@ -38,7 +38,7 @@ class GameRoomService {
                         players.push(this.sessions[player].Name)
                     }
                 })
-                let owner = sessKey
+                let owner = ""
                 let ownerKey = room.owner
                 if(this.sessions.hasOwnProperty(ownerKey)){
                     owner = this.sessions[ownerKey].Name
@@ -49,6 +49,14 @@ class GameRoomService {
                     type: this.rooms[roomName].type
                 }
                 res.send(resp)
+            }
+        }
+        this.isOwner = (req, res) => {
+            const {roomName, sessKey} = req.query
+            if(!this.rooms.hasOwnProperty(roomName)) {
+                res.send(false)
+            } else {
+                res.send(this.rooms[roomName].owner === sessKey)
             }
         }
         this.listRooms = (req, res) => {
@@ -71,6 +79,7 @@ class GameRoomService {
         }
         let router = new Router()
         router.get('/addRoom', this.addRoom)
+        router.get('/isOwner', this.isOwner)
         router.get('/getData', this.getData)
         router.get('/listRooms', this.listRooms)
         router.get('/addPlayer', this.addPlayer)
