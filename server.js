@@ -44,6 +44,3 @@ new GameRoomService(app, sessions, rooms)
 new MastermindService(app, sessions, rooms)
 new SessionService(app, sessions)
 new LoginService(app, sessions)
-function validateUserInput(inputVal){
-    return true
-}

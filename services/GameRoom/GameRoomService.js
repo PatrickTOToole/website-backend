@@ -13,6 +13,7 @@ class GameRoomService {
             if(rooms.hasOwnProperty(roomName) && type) {
                 res.send(false)
             } else {
+                console.log(sessKey)
                 this.rooms[roomName] = {
                     players: [sessKey],
                     owner: sessKey,
@@ -32,14 +33,11 @@ class GameRoomService {
             } else {
                 let players = []
                 let room = this.rooms[roomName]
-                console.log(room)
-                console.log(this.sessions)
                 room["players"].forEach((player) => {
                     if(this.sessions.hasOwnProperty(player)) {
                         players.push(this.sessions[player].Name)
                     }
                 })
-                console.log(sessKey)
                 let owner = sessKey
                 let ownerKey = room.owner
                 if(this.sessions.hasOwnProperty(ownerKey)){
@@ -62,9 +60,10 @@ class GameRoomService {
             // if (!validateUserInput(roomName)){
             //     return false
             // }
+            console.log("test")
             let room = this.rooms.hasOwnProperty(roomName)?this.rooms[roomName]:null
-            if (room && !room.players.hasOwnProperty(sessKey)){
-                room.players.push(sessKey)
+            if (room && !this.rooms[roomName].players.includes(sessKey)){
+                this.rooms[roomName].players.push(sessKey)
                 res.send(true)
             } else {
                 res.send(false)
