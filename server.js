@@ -39,11 +39,8 @@ server.listen(port, () => {
 // mountRoutes(app)
 let sessions = {}
 let rooms = {}
-
+let games = {}
 new GameRoomService(app, sessions, rooms)
-new MastermindService(app, sessions, rooms)
+new MastermindService(app, sessions, rooms, games)
 new SessionService(app, sessions)
 new LoginService(app, sessions)
-function validateUserInput(inputVal){
-    return true
-}

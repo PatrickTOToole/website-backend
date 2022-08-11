@@ -2,18 +2,15 @@ const {initGame} = require('./mastermind')
 const Router = require('express-promise-router')
 
 class MastermindService {
-    constructor(app, sessions, rooms){
+    constructor(app, sessions, rooms, games){
         this.sessions = sessions
         this.rooms = rooms
-        this.games = {"Pickle": initGame(4, 12,6,["Patrick"],["red","red","red","red"])}
-        this.dummyResp = (req, res) => {
-            const { id } = req.query
-            res.send(id)
-        }
+        this.games = games
         this.createGame = (req, res) => {
             const {gameName, numGuesses, players, answer } = req.query
+            const answerReal = answer.split(",")
             if (!this.games.hasOwnProperty(gameName)){
-                this.games[gameName] = initGame(4, numGuesses, 6, players, answer)
+                this.games[gameName] = initGame(4, 12, 6, players, answerReal)
                 res.send(true)
             } else {
                 res.send(false)
@@ -34,15 +31,17 @@ class MastermindService {
                 //     res.send(new Error("You are not a member of this game"))
                 // }
             } else {
-                res.send(new Error("Game does not exist"))
+                res.send(this.games)
             }
         }
         this.addGuess = (req, res) => {
             const { gameName, guess } = req.query
             // let sessKey = req.query.sessKey
+            let realGuess = guess.split(",")
+            realGuess.shift()
             let game = this.games.hasOwnProperty(gameName)?this.games[gameName]:null
             if (game /*&& sessKey*/) {
-                let resp = game.addGuess(guess)
+                let resp = this.games[gameName].addGuess(realGuess)
                 // if (game.players.hasOwnProperty(sessKey)){
                 //     let resp = game.addGuess(guess)
                 //     games[gameName] = game
@@ -50,6 +49,7 @@ class MastermindService {
                 // } else {
                 //     res.send(new Error("You are not a member of this game"))
                 // }
+                res.send(resp)
             } else {
                 res.send(new Error("Game does not exist"))
             }

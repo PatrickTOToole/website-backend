@@ -4,20 +4,19 @@ class SessionService {
     constructor(app, sessions){
         this.sessions = sessions
         this.createSession = (req, res) => {
-            const {uuid} = req.query.uuid
+            const {uuid, name} = req.query.uuid
             let sessKey = uuidv4()
             let sess_end = new Date(new Date())
             sess_end.setDate(sess_end.getDate() + 0.5)
             while(this.sessions.hasOwnProperty(sessKey)){
                 sessKey = uuidv4()
             }
-            throw Error("No name in database")
             this.sessions[sessKey] = {
                 UUID: uuid,
                 TTL: sess_end,
-                Name:"Misc"
+                Name: name
             }
-            return sessKey
+            res.send(sessKey)
         }
         this.createGuestSession = (req, res) => {
             // if(!validateUserInput(req.query.sessKey)){
@@ -25,7 +24,7 @@ class SessionService {
             // } else {
 
             // }
-            const {sessKey} = req.query
+            const {sessKey, name} = req.query
             if(this.sessions.hasOwnProperty(sessKey)){
                 res.send(new Error('Session already exists'))
             } else {
@@ -34,7 +33,7 @@ class SessionService {
                 this.sessions[sessKey] = {
                     UUID: "GuestUUID",
                     TTL: sess_end,
-                    Name: "Guest"
+                    Name: name
                 }
                 res.send("Successful")
             }
