@@ -30,17 +30,20 @@ const corsOptions = {
 }
 app.use(cors(corsOptions))
 const server = require('http').createServer(app);
-const io = require('socket.io')(server);
-
-io.on('connection', () => { /* … */ });
-server.listen(port, () => {
-    console.log(`App listening on ${port}`)
+const io = require('socket.io')(server, {cors: corsOptions});
+io.on('connection', function(client) {
+    console.log('Client connected...');
+    client.on('join', function(data) {
+      console.log(data);
+    });
 });
-// mountRoutes(app)
 let sessions = {}
 let rooms = {}
 let games = {}
-new GameRoomService(app, sessions, rooms)
+new GameRoomService(app, sessions, rooms, io)
 new MastermindService(app, sessions, rooms, games)
 new SessionService(app, sessions)
 new LoginService(app, sessions)
+server.listen(port, () => {
+    console.log(`App listening on ${port}`)
+});

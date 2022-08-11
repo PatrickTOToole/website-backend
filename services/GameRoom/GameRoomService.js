@@ -1,10 +1,10 @@
 const Router = require('express-promise-router')
 
 class GameRoomService {
-    constructor(app, sessions, rooms){
+    constructor(app, sessions, rooms, io){
+        this.io = io
         this.sessions = sessions
         this.rooms = rooms
-
         this.addRoom = (req, res) => {
             const {roomName, sessKey, type } = req.query
             // if (!validateUserInput(roomName)){
@@ -13,6 +13,8 @@ class GameRoomService {
             if(rooms.hasOwnProperty(roomName) && type) {
                 res.send(false)
             } else {
+                // io.on(`${roomName}`, (client) =>{
+                // })
                 console.log(sessKey)
                 this.rooms[roomName] = {
                     players: [sessKey],
