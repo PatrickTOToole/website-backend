@@ -1,30 +1,27 @@
 const Router = require('express-promise-router')
 const bcrypt = require('bcryptjs');
+const { validateUserInput } = require('../../validation')
 
 
 class LoginService {
-    constructor(app, sessions){
-        this.sessions = sessions
+    constructor(app, SessionManager){
+        this.SessionManager = SessionManager
         let router = new Router()
         this.validateLogin = (req, res) => {
+            // ---- validateQuery ----
+            if(!validateUserInput(req.query)){
+                res.send(false)
+                return null
+            }
             const {username, password} = req.query
-
-            // ---- validateUsername ----
-            // if(!validateUserInput(req.query.username)){
-            //     res.send(new Error("Invalid Input"))
-            // }
-            // if(!validateUserInput(req.query.password)){
-            //     res.send(new Error("Invalid Input"))
-            // }
             //uuid = lookup(uuidTable, req.query.username)
             //if (!uuid){
                 //res.send(new Error("User does not exist"))
             //}
-            //req.query.password
             // if hash(password + lookup(saltTable, password) + app.salt) == lookup(passTable, uuid)
-            
-            let sessKey = createSessionKey(uuid)
-            res.send(sessKey)
+            // const JWT = this.SessionManager.createSession(uuid, username)
+            // res.send(JWT)
+            res.send(false)
         }
         router.get('/validateLogin', this.validateLogin)
         app.use('/login', router)

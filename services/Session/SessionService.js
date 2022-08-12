@@ -1,15 +1,18 @@
 const Router = require('express-promise-router')
+const { validateUserInput, createSessKey, createJWT } = require('../../validation')
 
 class SessionService {
-    constructor(app, sessions){
-        this.sessions = sessions
-        this.createSession = (req, res) => {
-            const {uuid, name} = req.query.uuid
-            let sessKey = uuidv4()
+    constructor(app){
+        this.sessions = {}
+        this.sessionExists = (sessKey) => {
+            return this.sessions.hasOwnProperty(sessKey)
+        }
+        this.createSession = (uuid, name) => {
+            let sessKey = createSessKey()
             let sess_end = new Date(new Date())
             sess_end.setDate(sess_end.getDate() + 0.5)
             while(this.sessions.hasOwnProperty(sessKey)){
-                sessKey = uuidv4()
+                sessKey = createSessKey()
             }
             this.sessions[sessKey] = {
                 UUID: uuid,
@@ -17,14 +20,34 @@ class SessionService {
                 Name: name,
                 socket: undefined
             }
-            res.send(sessKey)
+            let JWTData = {
+                Name: name,
+                TTL: sess_end,
+                sessKey: sessKey
+            }
+            return(createJWT(JWTData))
+        }
+        this.emitAllSockets = (message, value) => {
+            Object.keys(this.sessions).forEach((session)=>{
+                this.sessions[session].socket.emit(message, value)
+            })
+        }
+        this.getSessionData = (sessKey) => {
+            let session = this.sessions[sessKey]
+            let UUID = session.UUID
+            let TTL = session.TTL
+            let Name = session.Name
+            let socket = session.socket
+            return [UUID, TTL, Name, socket]
+        }
+        this.setSocket = (sessKey, socket) => {
+            this.sessions[sessKey].socket = socket
         }
         this.createGuestSession = (req, res) => {
-            // if(!validateUserInput(req.query.sessKey)){
-            //     res.send(new Error("Invalid Input"))
-            // } else {
-
-            // }
+            if(!validateUserInput(req.query)){
+                res.send(new Error("Invalid Input"))
+                return null
+            }
             const {sessKey, name} = req.query
             if(this.sessions.hasOwnProperty(sessKey)){
                 res.send(new Error('Session already exists'))
@@ -40,10 +63,17 @@ class SessionService {
                 res.send("Successful")
             }
         }
-        this.validateSession = (req, res) => {
-            const {sessKey} = req.query
+        this.validateSession = (sessKey) => {
             let session = this.sessions.hasOwnProperty(sessKey)?this.sessions[sessKey]:null
-            if(session && session.TTL < new Date()){
+            return session && session.TTL < new Date()
+        }
+        this.validateSessionRoute = (req, res) => {
+            if(!validateUserInput(req.query)){
+                res.send(new Error("Invalid Input"))
+                return null
+            }
+            const {sessKey} = req.query
+            if(this.validateSession(sessKey)){
                 res.send("true")
             } else {
                 res.send("false")
@@ -51,7 +81,11 @@ class SessionService {
         }
         this.removeSession = (req, res) => {
             const {sessKey} = req.query
-            if(sessions.hasOwnProperty(sessKey)){
+            if(!validateUserInput(req.query)){
+                res.send(new Error("Invalid Input"))
+                return null
+            }
+            if(this.sessionExists(sessKey)){
                 delete this.sessions[sessKey]
                 res.send("Successful")
             } else {
@@ -59,10 +93,9 @@ class SessionService {
             }
         }
         let router = new Router()
-        router.get('/createSession', this.createSession)
         router.get('/removeSession', this.removeSession)
         router.get('/createGuestSession', this.createGuestSession)
-        router.get('/validateSession', this.validateSession)
+        router.get('/validateSession', this.validateSessionRoute)
         app.use('/sessions', router)
     }
 }
