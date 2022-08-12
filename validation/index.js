@@ -1,1 +1,1 @@
-module.exports.validateSession = require('./sessions.js')
+module.exports = require('./Validators.js')
