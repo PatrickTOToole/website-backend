@@ -1,10 +1,10 @@
 const Router = require('express-promise-router')
 
 class GameRoomService {
-    constructor(app, sessions, rooms){
+    constructor(app, sessions, rooms, sockets){
+        this.sockets = sockets
         this.sessions = sessions
         this.rooms = rooms
-
         this.addRoom = (req, res) => {
             const {roomName, sessKey, type } = req.query
             // if (!validateUserInput(roomName)){
@@ -13,9 +13,15 @@ class GameRoomService {
             if(rooms.hasOwnProperty(roomName) && type) {
                 res.send(false)
             } else {
+                // io.on(`${roomName}`, (client) =>{
+                // })
+                Object.keys(this.sessions).forEach((session)=>{
+                    this.sessions[session].socket.emit('updateGameList','updateGameList')
+                })
                 console.log(sessKey)
                 this.rooms[roomName] = {
                     players: [sessKey],
+                    sockets: [this.sessions[sessKey].socket],
                     owner: sessKey,
                     type: type
                 }
@@ -68,10 +74,13 @@ class GameRoomService {
             // if (!validateUserInput(roomName)){
             //     return false
             // }
-            console.log("test")
             let room = this.rooms.hasOwnProperty(roomName)?this.rooms[roomName]:null
             if (room && !this.rooms[roomName].players.includes(sessKey)){
                 this.rooms[roomName].players.push(sessKey)
+                this.rooms[roomName].sockets.push(this.sessions[sessKey].socket)
+                this.rooms[roomName].sockets.forEach((socket) =>{
+                    socket.emit(`update-${roomName}`,'update')
+                })
                 res.send(true)
             } else {
                 res.send(false)
