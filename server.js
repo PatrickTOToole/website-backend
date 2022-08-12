@@ -30,7 +30,6 @@ const corsOptions = {
 app.use(cors(corsOptions))
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {cors: corsOptions});
-const games = {}
 
 const SessionManager = new SessionService(app)
 const RoomManager = new GameRoomService(app, SessionManager)
