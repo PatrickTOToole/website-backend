@@ -31,19 +31,30 @@ const corsOptions = {
 app.use(cors(corsOptions))
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {cors: corsOptions});
+const sockets = {}
+const sessions = {}
+const rooms = {}
+const games = {}
+
+new MastermindService(app, sessions, rooms, games)
+new LoginService(app, sessions)
+new SessionService(app, sessions)
+
 io.on('connection', function(client) {
     console.log('Client connected...');
     client.on('join', function(data) {
-      console.log(data);
-    });
+    if(!sessions.hasOwnProperty(data)){
+        console.log('Disconnecting invalid session')
+        client.disconnect()
+    } else {
+        console.log(`adding socket to ${data}`)
+        sessions[data].socket = client
+    }});
 });
-let sessions = {}
-let rooms = {}
-let games = {}
-new GameRoomService(app, sessions, rooms, io)
-new MastermindService(app, sessions, rooms, games)
-new SessionService(app, sessions)
-new LoginService(app, sessions)
+
+new GameRoomService(app, sessions, rooms, sockets)
+
+
 server.listen(port, () => {
     console.log(`App listening on ${port}`)
 });

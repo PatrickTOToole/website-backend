@@ -10,7 +10,13 @@ class MastermindService {
             const {gameName, numGuesses, players, answer } = req.query
             const answerReal = answer.split(",")
             if (!this.games.hasOwnProperty(gameName)){
-                this.games[gameName] = initGame(4, 12, 6, players, answerReal)
+                this.games[gameName] = {
+                    game: initGame(4, 12, 6, players, answerReal),
+                    sockets: [...this.rooms[gameName].sockets]
+                }
+                this.rooms[gameName].sockets.forEach((socket)=>{
+                    socket.emit(`update-${gameName}-pull`,'pull')
+                })
                 res.send(true)
             } else {
                 res.send(false)
@@ -24,7 +30,7 @@ class MastermindService {
             // let sessKey = req.query.sessKey
             let game = this.games.hasOwnProperty(gameName)?this.games[gameName]:null
             if (game && game != undefined && sessKey) {
-                res.send([game.guess_arr, game.res_arr]); //Line 10
+                res.send([game.game.guess_arr, game.game.res_arr]); //Line 10
                 // if (game.players.hasOwnProperty(sessKey)){
                 //     res.send([game.guess_arr, game.res_arr]); //Line 10
                 // } else {
@@ -41,7 +47,10 @@ class MastermindService {
             realGuess.shift()
             let game = this.games.hasOwnProperty(gameName)?this.games[gameName]:null
             if (game /*&& sessKey*/) {
-                let resp = this.games[gameName].addGuess(realGuess)
+                let resp = this.games[gameName].game.addGuess(realGuess)
+                this.games[gameName].sockets.forEach(socket => {
+                    socket.emit(`update-${gameName}`,"update")
+                });
                 // if (game.players.hasOwnProperty(sessKey)){
                 //     let resp = game.addGuess(guess)
                 //     games[gameName] = game

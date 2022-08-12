@@ -14,7 +14,8 @@ class SessionService {
             this.sessions[sessKey] = {
                 UUID: uuid,
                 TTL: sess_end,
-                Name: name
+                Name: name,
+                socket: undefined
             }
             res.send(sessKey)
         }
@@ -33,7 +34,8 @@ class SessionService {
                 this.sessions[sessKey] = {
                     UUID: "GuestUUID",
                     TTL: sess_end,
-                    Name: name
+                    Name: name,
+                    socket: undefined
                 }
                 res.send("Successful")
             }
