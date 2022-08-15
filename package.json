@@ -4,7 +4,9 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:dev": "BUILD_ENV=dev node server.js",
+    "start:prod": "BUILD_ENV=prod node server.js "
   },
   "author": "",
   "license": "ISC",
