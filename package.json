@@ -5,8 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start:dev": "node server.js BUILD_ENV=dev",
-    "start:prod": "node server.js BUILD_ENV=prod"
+    "start:dev": "BUILD_ENV=dev node server.js",
+    "start:prod": "BUILD_ENV=prod node server.js "
   },
   "author": "",
   "license": "ISC",
