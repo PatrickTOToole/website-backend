@@ -1,2 +1,2 @@
-web: npm start BUILD_ENV=PROD
-web: npm start BUILD_ENV=DEV
+web: npm start:prod
+web: npm start:dev
