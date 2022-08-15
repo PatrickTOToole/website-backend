@@ -10,14 +10,16 @@ const cors = require('cors');
 let port = 5000; //Line 3
 let FRONT_END = "http://localhost:3000"
 let BACK_END = "http://localhost:5000"
-if (process.env.PORT){
+if (process.env.BUILD_ENV == "prod"){
     port = process.env.PORT; //Line 3
-    FRONT_END = ["https://www.patricktotoole.com", "https://patricktotoole.com", "https://dev.patricktotoole.com"]
+    FRONT_END = ["https://www.patricktotoole.com"]
     BACK_END = "https://patricktotoole.herokuapp.com"
+} else if (process.env.BUILD_ENV == "dev"){
+    FRONT_END =["https://dev.patricktotoole.com"]
+    BACK_END = "https://patricktotoole-dev.herokuapp.com"
 }
-console.log(process.env.BUILD_ENV)
 const app = express()
-const whitelist = [...FRONT_END]
+const whitelist = [...FRONT_END, BACK_END]
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
