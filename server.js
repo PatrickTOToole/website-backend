@@ -12,11 +12,11 @@ let FRONT_END = "http://localhost:3000"
 let BACK_END = "http://localhost:5000"
 if (process.env.PORT){
     port = process.env.PORT; //Line 3
-    FRONT_END = "https://www.patricktotoole.com"
+    FRONT_END = ["https://www.patricktotoole.com", "https://patricktotoole.com", "https://dev.patricktotoole.com"]
     BACK_END = "https://patricktotoole.herokuapp.com"
 }
 const app = express()
-const whitelist = [FRONT_END, BACK_END]
+const whitelist = [...FRONT_END, BACK_END]
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
