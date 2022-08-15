@@ -49,6 +49,9 @@ class SessionService {
                 return null
             }
             const {sessKey, name} = req.query
+            if(sessKey == null){
+                res.send("Invalid Input")
+            }
             if(this.sessions.hasOwnProperty(sessKey)){
                 res.send(new Error('Session already exists'))
             } else {

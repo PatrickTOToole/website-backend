@@ -16,7 +16,7 @@ if (process.env.PORT){
     BACK_END = "https://patricktotoole.herokuapp.com"
 }
 const app = express()
-const whitelist = [...FRONT_END, BACK_END]
+const whitelist = [...FRONT_END]
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
