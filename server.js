@@ -15,6 +15,7 @@ if (process.env.PORT){
     FRONT_END = ["https://www.patricktotoole.com", "https://patricktotoole.com", "https://dev.patricktotoole.com"]
     BACK_END = "https://patricktotoole.herokuapp.com"
 }
+console.log(process.env.BUILD_ENV)
 const app = express()
 const whitelist = [...FRONT_END]
 const corsOptions = {
