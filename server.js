@@ -43,7 +43,7 @@ io.on('connection', function(client) {
         console.log('Disconnecting invalid session')
         client.disconnect()
     } else {
-        console.log(`adding socket to session: ${data}`)
+        console.log(`adding socket to session: ${sessKey}`)
         SessionManager.setSocket(sessKey, client)
     }});
 });
