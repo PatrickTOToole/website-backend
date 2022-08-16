@@ -18,6 +18,7 @@ if (process.env.BUILD_ENV == "prod"){
     SELF = "https://patricktotoole.herokuapp.com"
     SESSION_SERVICE = "https://patricktotoole-sessions.herokuapp.com"
 } else if (process.env.BUILD_ENV == "dev"){
+    port = process.env.PORT; //Line 3
     FRONT_END ="https://dev.patricktotoole.com"
     SELF = "https://patricktotoole-dev.herokuapp.com"
     SESSION_SERVICE = "https://patricktotoole-sessions-dev.herokuapp.com"
