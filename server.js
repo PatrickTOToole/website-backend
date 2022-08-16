@@ -25,6 +25,7 @@ if (process.env.BUILD_ENV == "prod"){
 }
 const app = express()
 const whitelist = [FRONT_END, SELF, SESSION_SERVICE]
+console.log(SESSION_SERVICE)
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
