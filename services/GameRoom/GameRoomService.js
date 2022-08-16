@@ -3,11 +3,11 @@ const { validateUserInput, createSessKey, createJWT } = require('../../validatio
 
 
 class GameRoomService {
-    constructor(app){
+    constructor(app, SESSION_SERVICE){
+        this.SESSION_SERVICE = SESSION_SERVICE
         this.rooms = {}
         this.addRoom = async (req, res) => {
             const {roomName, sessKey, type } = req.query
-            const SESSION_SERVICE = req.app.get("SessionService")
             if (!validateUserInput(req.query)){
                 res.send(false)
                 return false
@@ -20,7 +20,7 @@ class GameRoomService {
                     owner: sessKey,
                     type: type
                 }
-                await fetch(`${SESSION_SERVICE}/sessions/emitAllSockets?message=updateGameList&value=updateGameList`)
+                await fetch(`${this.SESSION_SERVICE}/sessions/emitAllSockets?message=updateGameList&value=updateGameList`)
                 res.send(true)
             }
 
@@ -41,7 +41,7 @@ class GameRoomService {
                 return false
             }
             const {roomName, sessKey} = req.query
-            const SESSION_SERVICE = req.app.get("SessionService")
+            const SESSION_SERVICE = this.SESSION_SERVICE
             if(!this.doesRoomExist(roomName)) {
                 res.send(false)
             } else {
@@ -106,7 +106,7 @@ class GameRoomService {
         }
         this.addPlayer = async (req, res) => {
             const {roomName, sessKey} = req.query
-            const SESSION_SERVICE = req.app.get("SessionService")
+            const SESSION_SERVICE = this.SESSION_SERVICE
             if (!validateUserInput(req.query)){
                 res.send(false)
                 return false

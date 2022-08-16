@@ -36,15 +36,15 @@ const corsOptions = {
   credentials: true,
 }
 app.use(cors(corsOptions))
-app.set("SessionService",SESSION_SERVICE)
+app.set("SessionService", SESSION_SERVICE)
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {cors: corsOptions});
 
 
 // const SessionManager = new SessionService(app)
 // new LoginService(app, SessionManager)
-const RoomManager = new GameRoomService(app)
-new MastermindService(app, RoomManager)
+const RoomManager = new GameRoomService(app, SESSION_SERVICE)
+new MastermindService(app, RoomManager, SESSION_SERVICE)
 
 
 // io.on('connection', async function(client) {

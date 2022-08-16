@@ -3,9 +3,10 @@ const Router = require('express-promise-router')
 const { validateUserInput } = require('../../validation')
 
 class MastermindService {
-    constructor(app, RoomManager){
+    constructor(app, RoomManager, SESSION_SERVICE){
         this.RoomManager = RoomManager
         this.games = {}
+        this.SESSION_SERVICE = SESSION_SERVICE
         this.doesGameExist = (gameName) => {
             return this.games.hasOwnProperty(gameName)
         }
@@ -15,7 +16,7 @@ class MastermindService {
                 return null
             }
             const {gameName, numGuesses, answer, sessKey } = req.query
-            const SESSION_SERVICE = req.app.get("SessionService")
+            const SESSION_SERVICE = this.SESSION_SERVICE
             if(!this.RoomManager.doesRoomExist(gameName)){
                 res.send(false)
                 return null
@@ -68,7 +69,7 @@ class MastermindService {
                 return null
             }
             const { gameName, guess, sessKey } = req.query
-            const SESSION_SERVICE = req.app.get("SessionService")
+            const SESSION_SERVICE = this.SESSION_SERVICE
             let realGuess = guess.split(",")
             realGuess.shift()
             let game = this.doesGameExist(gameName)?this.games[gameName]:null
