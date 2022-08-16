@@ -1,10 +1,10 @@
 const Router = require('express-promise-router')
+const axios = require('axios')
 const { validateUserInput, createSessKey, createJWT } = require('../../validation')
 
-
 class GameRoomService {
-    constructor(app, SessionManager){
-        this.SessionManager = SessionManager
+    constructor(app, SESSION_SERVICE){
+        this.SESSION_SERVICE = SESSION_SERVICE
         this.rooms = {}
         this.addRoom = async (req, res) => {
             const {roomName, sessKey, type } = req.query
@@ -15,13 +15,12 @@ class GameRoomService {
             if(this.doesRoomExist(roomName) && type) {
                 res.send(false)
             } else {
-                await fetch(`localhost:5001/sessions/emitAllSockets/?message=updateGameList&value=updateGameList`)
                 this.rooms[roomName] = {
                     players: [sessKey],
-                    sockets: [await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[3]],
                     owner: sessKey,
                     type: type
                 }
+                await axios.get(`${this.SESSION_SERVICE}/sessions/emitAllSockets?message=updateGameList&value=updateGameList`)
                 res.send(true)
             }
 
@@ -31,10 +30,9 @@ class GameRoomService {
                 return false
             } else {
                 let room = this.rooms[roomName]
-                let sockets = [...room.sockets]
                 let players = [...room.players]
                 let owner = room.owner
-                return [sockets, owner, players]
+                return [owner, players]
             }
         }
         this.getData = async (req, res) => {
@@ -43,20 +41,24 @@ class GameRoomService {
                 return false
             }
             const {roomName, sessKey} = req.query
+            const SESSION_SERVICE = this.SESSION_SERVICE
             if(!this.doesRoomExist(roomName)) {
                 res.send(false)
             } else {
                 let players = []
                 let room = this.rooms[roomName]
-                room["players"].forEach((sessKey) => {
-                    if(await fetch(`localhost:5001/sessions/validateSession/sessKey=${sessKey}`)) {
-                        players.push(await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[2])
+                for (let playerKey of room.players) {
+                    let resp = await axios.get(`${SESSION_SERVICE}/sessions/validateSession?sessKey=${playerKey}`)
+                    if(resp.data) {
+                        let name = (await axios.get(`${SESSION_SERVICE}/sessions/getSessionData?sessKey=${playerKey}`)).data[2]
+                        players.push(name)
                     }
-                })
+                }
                 let owner = ""
                 let ownerKey = room.owner
-                if(await fetch(`localhost:5001/sessions/validateSession/sessKey=${ownerKey}`)){
-                    owner = await fetch(`localhost:5001/sessions/getSessionData/sessKey=${ownerKey}`)[2]
+                let new_resp = await axios.get(`${SESSION_SERVICE}/sessions/validateSession?sessKey=${ownerKey}`)
+                if(new_resp.data){
+                    owner = (await axios.get(`${SESSION_SERVICE}/sessions/getSessionData/?sessKey=${ownerKey}`)).data[2]
                 }
                 let resp = {
                     owner: owner,
@@ -102,21 +104,22 @@ class GameRoomService {
             })
             res.send(listedRooms)
         }
-        this.addPlayer = (req, res) => {
+        this.addPlayer = async (req, res) => {
             const {roomName, sessKey} = req.query
+            const SESSION_SERVICE = this.SESSION_SERVICE
             if (!validateUserInput(req.query)){
                 res.send(false)
                 return false
             }
-            let socket = await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[3]
             if (this.doesRoomExist(roomName) && !this.isPlayerMember(roomName, sessKey)){
                 this.rooms[roomName].players.push(sessKey)
-                this.rooms[roomName].sockets.push(socket)
-                this.rooms[roomName].sockets.forEach((socket) =>{
-                    socket.emit(`update-${roomName}`,'update')
-                })
+                for(let idx in this.rooms[roomName].players){
+                    let playerKey = this.rooms[roomName].players[idx]
+                    axios.get(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${roomName}&value=update`)
+                }
                 res.send(true)
             } else {
+                console.log("ahshsh")
                 res.send(false)
             }
         }
