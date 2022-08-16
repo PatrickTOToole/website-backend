@@ -6,7 +6,7 @@ class GameRoomService {
     constructor(app, SessionManager){
         this.SessionManager = SessionManager
         this.rooms = {}
-        this.addRoom = (req, res) => {
+        this.addRoom = async (req, res) => {
             const {roomName, sessKey, type } = req.query
             if (!validateUserInput(req.query)){
                 res.send(false)
@@ -15,10 +15,10 @@ class GameRoomService {
             if(this.doesRoomExist(roomName) && type) {
                 res.send(false)
             } else {
-                this.SessionManager.emitAllSockets('updateGameList','updateGameList')
+                await fetch(`localhost:5001/sessions/emitAllSockets/?message=updateGameList&value=updateGameList`)
                 this.rooms[roomName] = {
                     players: [sessKey],
-                    sockets: [this.SessionManager.getSessionData(sessKey)[3]],
+                    sockets: [await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[3]],
                     owner: sessKey,
                     type: type
                 }
@@ -37,7 +37,7 @@ class GameRoomService {
                 return [sockets, owner, players]
             }
         }
-        this.getData = (req, res) => {
+        this.getData = async (req, res) => {
             if (!validateUserInput(req.query)){
                 res.send(false)
                 return false
@@ -49,14 +49,14 @@ class GameRoomService {
                 let players = []
                 let room = this.rooms[roomName]
                 room["players"].forEach((sessKey) => {
-                    if(this.SessionManager.validateSession(sessKey)) {
-                        players.push(this.SessionManager.getSessionData(sessKey)[2])
+                    if(await fetch(`localhost:5001/sessions/validateSession/sessKey=${sessKey}`)) {
+                        players.push(await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[2])
                     }
                 })
                 let owner = ""
                 let ownerKey = room.owner
-                if(this.SessionManager.validateSession(ownerKey)){
-                    owner = this.SessionManager.getSessionData(ownerKey)[2]
+                if(await fetch(`localhost:5001/sessions/validateSession/sessKey=${ownerKey}`)){
+                    owner = await fetch(`localhost:5001/sessions/getSessionData/sessKey=${ownerKey}`)[2]
                 }
                 let resp = {
                     owner: owner,
@@ -108,7 +108,7 @@ class GameRoomService {
                 res.send(false)
                 return false
             }
-            let socket = this.SessionManager.getSessionData(sessKey)[3]
+            let socket = await fetch(`localhost:5001/sessions/getSessionData/sessKey=${sessKey}`)[3]
             if (this.doesRoomExist(roomName) && !this.isPlayerMember(roomName, sessKey)){
                 this.rooms[roomName].players.push(sessKey)
                 this.rooms[roomName].sockets.push(socket)

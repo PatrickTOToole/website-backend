@@ -9,17 +9,18 @@ const {
 const cors = require('cors');
 let port = 5000; //Line 3
 let FRONT_END = "http://localhost:3000"
-let BACK_END = "http://localhost:5000"
+let BACK_END = ["http://localhost:5000","http://localhost:5001"] 
+
 if (process.env.BUILD_ENV == "prod"){
     port = process.env.PORT; //Line 3
     FRONT_END = ["https://www.patricktotoole.com"]
-    BACK_END = "https://patricktotoole.herokuapp.com"
+    BACK_END = ["https://patricktotoole.herokuapp.com"]
 } else if (process.env.BUILD_ENV == "dev"){
     FRONT_END =["https://dev.patricktotoole.com"]
-    BACK_END = "https://patricktotoole-dev.herokuapp.com"
+    BACK_END = ["https://patricktotoole-dev.herokuapp.com"]
 }
 const app = express()
-const whitelist = [...FRONT_END, BACK_END]
+const whitelist = [...FRONT_END, ...BACK_END]
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
@@ -35,19 +36,28 @@ const server = require('http').createServer(app);
 const io = require('socket.io')(server, {cors: corsOptions});
 
 const SessionManager = new SessionService(app)
+new LoginService(app, SessionManager)
 const RoomManager = new GameRoomService(app, SessionManager)
 new MastermindService(app, RoomManager)
-new LoginService(app, SessionManager)
 
-io.on('connection', function(client) {
+
+io.on('connection', async function(client) {
     console.log('Client connected...');
     client.on('join', function(sessKey) {
-    if(!SessionManager.validateSession(sessKey)){
+    if(!await fetch(`localhost:5001/sessions/validateSession/sessKey=${sessKey}`)){
         console.log('Disconnecting invalid session')
         client.disconnect()
     } else {
         console.log(`adding socket to session: ${sessKey}`)
-        SessionManager.setSocket(sessKey, client)
+        let test = await fetch(`localhost:5001/sessions/setSocket/sessKey=${sessKey}`,{
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+              },
+              method: "POST",
+              body: JSON.stringify({"socket":client})
+        })
+        console.log(test)
     }});
 });
 
