@@ -9,7 +9,7 @@ class MastermindService {
         this.doesGameExist = (gameName) => {
             return this.games.hasOwnProperty(gameName)
         }
-        this.createGame = (req, res) => {
+        this.createGame = async (req, res) => {
             if(!validateUserInput(req.query)){
                 res.send(new Error("Invalid Input"))
                 return null
@@ -19,7 +19,7 @@ class MastermindService {
                 res.send(false)
                 return null
             }
-            const [sockets, owner, players] = this.RoomManager.getRoomData(gameName)
+            const [owner, players] = this.RoomManager.getRoomData(gameName)
             if(!this.RoomManager.isOwner(gameName, sessKey)){
                 res.send(false)
                 return null
@@ -28,13 +28,14 @@ class MastermindService {
             if (!this.doesGameExist(gameName)){
                 this.games[gameName] = {
                     game: initGame(4, 12, 6, answerReal),
-                    sockets: [...sockets],
                     owner: owner,
                     players: [...players]
                 }
-                this.games[gameName].sockets.forEach((socket)=>{
-                    socket.emit(`update-${gameName}-pull`,'pull')
-                })
+                for(let idx in this.games[gameName].players){
+                    let playerKey = this.games[gameName].players[idx]
+                    await fetch(`http://localhost:5001/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}-pull&value=pull`)
+
+                }
                 res.send(true)
             } else {
                 res.send(false)
@@ -49,12 +50,10 @@ class MastermindService {
                 return null
             }
             const { gameName, sessKey } = req.query
-            // let sessKey = req.query.sessKey
             let game = this.doesGameExist(gameName)?this.games[gameName]:null
             if (game && game != undefined && sessKey) {
-                // res.send([game.guess_arr, game.res_arr]); //Line 10
                 if (game.players.includes(sessKey)){
-                    res.send([game.game.guess_arr, game.game.res_arr]); //Line 10
+                    res.send([game.game.guess_arr, game.game.res_arr]);
                 } else {
                     res.send(new Error("You are not a member of this game"))
                 }
@@ -62,22 +61,22 @@ class MastermindService {
                 res.send(false)
             }
         }
-        this.addGuess = (req, res) => {
+        this.addGuess = async (req, res) => {
             if(!validateUserInput(req.query)){
                 res.send(new Error("Invalid Input"))
                 return null
             }
             const { gameName, guess, sessKey } = req.query
-            // let sessKey = req.query.sessKey
             let realGuess = guess.split(",")
             realGuess.shift()
             let game = this.doesGameExist(gameName)?this.games[gameName]:null
             if (game && sessKey) {
                 if (game.players.includes(sessKey)){
                     let resp = this.games[gameName].game.addGuess(realGuess)
-                    this.games[gameName].sockets.forEach(socket => {
-                        socket.emit(`update-${gameName}`,"update")
-                    }); 
+                    for (let idx in this.games[gameName].players){
+                        let playerKey = this.games[gameName].players[idx]
+                        await fetch(`http://localhost:5001/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}&value=update`)
+                    }
                     res.send(resp)
                 } else {
                     res.send(new Error("You are not a member of this game"))
