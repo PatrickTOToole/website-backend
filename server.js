@@ -23,7 +23,7 @@ if (process.env.BUILD_ENV == "prod"){
     SESSION_SERVICE = "https://patricktotoole-sessions-dev.herokuapp.com"
 }
 const app = express()
-const whitelist = [...FRONT_END, SELF, SESSION_SERVICE]
+const whitelist = [FRONT_END, SELF, SESSION_SERVICE]
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin || whitelist.indexOf(origin) !== -1) {
@@ -46,25 +46,25 @@ const RoomManager = new GameRoomService(app)
 new MastermindService(app, RoomManager)
 
 
-io.on('connection', async function(client) {
-    console.log('Client connected...');
-    client.on('join', async function(sessKey) {
-    if(!await fetch(`${SESSION_SERVICE}/sessions/validateSession/sessKey=${sessKey}`)){
-        console.log('Disconnecting invalid session')
-        client.disconnect()
-    } else {
-        console.log(`adding socket to session: ${sessKey}`)
-        let test = await fetch(`${SESSION_SERVICE}/sessions/setSocket/sessKey=${sessKey}`,{
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-              },
-              method: "POST",
-              body: JSON.stringify({"socket":client})
-        })
-        console.log(test)
-    }});
-});
+// io.on('connection', async function(client) {
+//     console.log('Client connected...');
+//     client.on('join', async function(sessKey) {
+//     if(!await fetch(`${SESSION_SERVICE}/sessions/validateSession/sessKey=${sessKey}`)){
+//         console.log('Disconnecting invalid session')
+//         client.disconnect()
+//     } else {
+//         console.log(`adding socket to session: ${sessKey}`)
+//         let test = await fetch(`${SESSION_SERVICE}/sessions/setSocket/sessKey=${sessKey}`,{
+//             headers: {
+//                 'Accept': 'application/json',
+//                 'Content-Type': 'application/json'
+//               },
+//               method: "POST",
+//               body: JSON.stringify({"socket":client})
+//         })
+//         console.log(test)
+//     }});
+// });
 
 
 
