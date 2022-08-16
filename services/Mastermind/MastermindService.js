@@ -15,6 +15,7 @@ class MastermindService {
                 return null
             }
             const {gameName, numGuesses, answer, sessKey } = req.query
+            const SESSION_SERVICE = req.app.get("SessionService")
             if(!this.RoomManager.doesRoomExist(gameName)){
                 res.send(false)
                 return null
@@ -33,7 +34,7 @@ class MastermindService {
                 }
                 for(let idx in this.games[gameName].players){
                     let playerKey = this.games[gameName].players[idx]
-                    await fetch(`http://localhost:5001/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}-pull&value=pull`)
+                    await fetch(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}-pull&value=pull`)
 
                 }
                 res.send(true)
@@ -67,6 +68,7 @@ class MastermindService {
                 return null
             }
             const { gameName, guess, sessKey } = req.query
+            const SESSION_SERVICE = req.app.get("SessionService")
             let realGuess = guess.split(",")
             realGuess.shift()
             let game = this.doesGameExist(gameName)?this.games[gameName]:null
@@ -75,7 +77,7 @@ class MastermindService {
                     let resp = this.games[gameName].game.addGuess(realGuess)
                     for (let idx in this.games[gameName].players){
                         let playerKey = this.games[gameName].players[idx]
-                        await fetch(`http://localhost:5001/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}&value=update`)
+                        await fetch(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}&value=update`)
                     }
                     res.send(resp)
                 } else {
