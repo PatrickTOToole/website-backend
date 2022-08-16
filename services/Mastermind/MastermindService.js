@@ -1,6 +1,7 @@
 const {initGame} = require('./mastermind')
 const Router = require('express-promise-router')
 const { validateUserInput } = require('../../validation')
+const axios = require('axios')
 
 class MastermindService {
     constructor(app, RoomManager, SESSION_SERVICE){
@@ -35,8 +36,7 @@ class MastermindService {
                 }
                 for(let idx in this.games[gameName].players){
                     let playerKey = this.games[gameName].players[idx]
-                    await fetch(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}-pull&value=pull`)
-
+                    await axios.get(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}-pull&value=pull`)
                 }
                 res.send(true)
             } else {
@@ -78,7 +78,7 @@ class MastermindService {
                     let resp = this.games[gameName].game.addGuess(realGuess)
                     for (let idx in this.games[gameName].players){
                         let playerKey = this.games[gameName].players[idx]
-                        await fetch(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}&value=update`)
+                        await axios.get(`${SESSION_SERVICE}/sessions/emitSocket?sessKey=${playerKey}&message=update-${gameName}&value=update`)
                     }
                     res.send(resp)
                 } else {
