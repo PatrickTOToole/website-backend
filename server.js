@@ -2,7 +2,6 @@ const express = require('express')
 const { 
     MastermindService, 
     GameRoomService, 
-    SessionService,
     LoginService
 } = require('./services')
 // const mountRoutes = require('./express_routes')
@@ -37,7 +36,6 @@ const corsOptions = {
   credentials: true,
 }
 app.use(cors(corsOptions))
-app.set("SessionService", SESSION_SERVICE)
 const server = require('http').createServer(app);
 const io = require('socket.io')(server, {cors: corsOptions});
 

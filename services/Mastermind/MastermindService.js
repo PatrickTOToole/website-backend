@@ -71,7 +71,6 @@ class MastermindService {
             const { gameName, guess, sessKey } = req.query
             const SESSION_SERVICE = this.SESSION_SERVICE
             let realGuess = guess.split(",")
-            realGuess.shift()
             let game = this.doesGameExist(gameName)?this.games[gameName]:null
             if (game && sessKey) {
                 if (game.players.includes(sessKey)){
